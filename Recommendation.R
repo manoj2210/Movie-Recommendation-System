@@ -72,3 +72,83 @@ write.csv(SearchMatrix, "search.csv")
 subset(SearchMatrix, Action == 1 & year == 1995)$title
 
 
+##Creating a user profile
+
+binary_rating<-rating_data
+
+# ratings of 4 and 5 are mapped to 1, 
+# representing likes, and ratings of 3 
+# and below are mapped to -1, representing 
+# dislikes:
+
+for(x in 1:nrow(binary_rating))
+{
+  if(binary_rating[x,3]>3){
+    binary_rating[x,3]<-1
+  }
+  else{
+    binary_rating[x,3]<-0
+  }
+}
+
+# convert binaryratings matrix to the correct format:
+
+binaryrating_new <- dcast(binary_rating, movieId~userId, value.var = "rating", na.rm=FALSE)
+
+for (i in 1:ncol(binaryrating_new)){
+  binaryrating_new[which(is.na(binaryrating_new[,i]) == TRUE),i] <- 0 #remove na
+}
+binaryratings_new = binaryrating_new[,-1] #remove movieIds col. Rows are movieIds, cols are userIds
+
+#Remove rows that are not rated from movies dataset
+
+movieId <- length(unique(movie_data$movieId)) #10329
+
+ratingmovieIds <- length(unique(rating_data$movieId)) #10325
+
+movies_new <- movie_data[-which((movie_data$movieId %in% rating_data$movieId) == FALSE),]
+
+rownames(movies_new) <- NULL
+
+#Remove rows that are not rated from genre_matrix2
+
+genre_matrix3 <- genre_mat2[-which((movie_data$movieId %in% rating_data$movieId) == FALSE),]
+
+rownames(genre_matrix3) <- NULL
+
+# calculate the dot product of the genre matrix and 
+# the ratings matrix and obtain the user profiles
+
+#Calculate dot product for User Profiles
+
+result = matrix(0,18,668) # Here, 668=no of users/raters, 18=no of genres
+
+for (c in 1:ncol(binaryratings_new)){
+
+    for (i in 1:ncol(genre_matrix3)){
+  
+        result[i,c] <- sum((genre_matrix3[,i]) * (binaryratings_new[,c])) #ratings per genre
+  }
+}
+
+#Convert to Binary scale
+
+for (c in 1:ncol(result)){
+  for (i in 1:nrow(result)){
+    if (result[i,c] < 0){
+      result[i,c] <- 0
+    }
+    else {
+      result[i,c] <- 1
+    }
+  }
+}
+
+## Assume that users like similar items, and retrieve movies 
+# that are closest in similarity to a user's profile, which 
+# represents a user's preference for an item's feature.
+# use Jaccard Distance to measure the similarity between user profiles
+## Jaccard distance calculats the similarity among clusters
+# The User-Based Collaborative Filtering Approach
+
+
