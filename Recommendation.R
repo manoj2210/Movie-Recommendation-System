@@ -1,13 +1,13 @@
 library(recommenderlab)
 
-library(ggplot2)                       
+#library(ggplot2)                       
 
 library(data.table) #For converting the Data into more Usable form 
 
 library(reshape2)
 
 #For importing the data setting the Working Directory
-setwd("G:\\Movie-Recommendation-System") 
+setwd("C:\\Users\\TEMP.CS2K16.003\\Downloads\\Movie-Recommendation-System-master\\Movie-Recommendation-System-master")
 
 #Loading the Movie and Rating Data
 
@@ -31,7 +31,7 @@ list_genre <- c("Action", "Adventure", "Animation", "Children",
                 "Sci-Fi", "Thriller", "War", "Western")
 
 genre_mat1 <- matrix(0,10330,18) #Creating a matrix of 10330 rows(observations) and 18 columns(list of genres)
-
+genre_mat1[1,]<-list_genre
 colnames(genre_mat1) <- list_genre #Set Column names as genres
 
 for (index in 1:nrow(movie_genre2)) {
@@ -40,6 +40,8 @@ for (index in 1:nrow(movie_genre2)) {
     genre_mat1[index+1,gen_col] <- 1
   }
 }
+
+genre_mat2 <- as.data.frame(genre_mat1[-1,], stringsAsFactors=FALSE) #remove first row, which was the genre list
 
 for (col in 1:ncol(genre_mat2)) {
   genre_mat2[,col] <- as.integer(genre_mat2[,col]) #convert from characters to integers
